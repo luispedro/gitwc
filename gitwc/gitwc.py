@@ -10,15 +10,16 @@ class Wc(object):
         self.chars += len(data)
         self.words += len(data.strip().split())
 
-def stats(commit, pattern='*'):
+def stats(commit, pattern='*', w=None):
     tree = commit.tree
-    w = Wc()
+    if w is None:
+        w = Wc()
     for elem in tree.traverse():
         if isinstance(elem, git.Blob) and fnmatch(elem.abspath, pattern):
             elem.stream_data(w)
-    return (commit.committed_date, w.chars, w.words)
+    return (commit.committed_date, w)
 
-def recursive_stats(commit, pattern):
+def recursive_stats(commit, pattern, gatherer=Wc):
     seen = set()
     queue = [commit]
     allstats = []
@@ -26,7 +27,7 @@ def recursive_stats(commit, pattern):
         next = queue.pop()
         if next not in seen:
             seen.add(next)
-            allstats.append(stats(next, pattern))
+            allstats.append(stats(next, pattern, gatherer()))
             queue.extend(next.parents)
     return allstats
 
@@ -39,8 +40,9 @@ if __name__ == '__main__':
         pattern = '*'
     repo = git.Repo('.')
     allstats = recursive_stats(repo.head.commit, pattern)
-    times = [t for t,_,_ in allstats]
-    chars = [c for _,c,_ in allstats]
-    words = [w for _,_,w in allstats]
+    times = [t for t,_ in allstats]
+    chars = [w.chars for _,w in allstats]
+    words = [w.words for _,w in allstats]
     plt.plot(map(datetime.fromtimestamp, times), words)
+    plt.savefig("words.pdf")
     plt.show()
