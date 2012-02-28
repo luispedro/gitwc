@@ -44,5 +44,9 @@ if __name__ == '__main__':
     chars = [w.chars for _,w in allstats]
     words = [w.words for _,w in allstats]
     plt.plot(map(datetime.fromtimestamp, times), words)
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    plt.ylabel(r'Nr. words')
+    plt.xlabel(r'time')
     plt.savefig("words.pdf")
     plt.show()
