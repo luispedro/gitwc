@@ -1,6 +1,17 @@
 from datetime import datetime
 from fnmatch import fnmatch
-import git
+try:
+    import git
+except ImportError:
+    from sys import stderr
+    stderr.write('''\
+import git failed!
+
+Try::
+
+    pip install GitPython
+''')
+    raise
 
 class Wc(object):
     def __init__(self):
