@@ -14,12 +14,19 @@ Try::
     raise
 
 class Wc(object):
-    def __init__(self):
-        self.chars = 0
-        self.words = 0
+    def __init__(self, c=0, w=0, ells=0):
+        self.chars = c
+        self.words = w
+        self.lines = ells
+
     def write(self, data):
         self.chars += len(data)
         self.words += len(data.strip().split())
+        self.lines += data.count('\n')
+
+    def __repr__(self):
+        return 'Wc(chars={}, words={}, lines={})'.format(self.chars, self.words, self.lines)
+    __str__ = __repr__
 
 def stats(commit, pattern='*', w=None):
     tree = commit.tree
