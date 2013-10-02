@@ -49,6 +49,26 @@ def recursive_stats(commit, pattern, gatherer=Wc):
             queue.extend(next.parents)
     return allstats
 
+def stats_for_repo(repo, pattern='*'):
+    repo = git.Repo(repo)
+    return recursive_stats(repo.head.commit, pattern)
+
+def extract_stats(allstats):
+    import numpy as np
+    from collections import namedtuple
+    times = np.array([t for t,_ in allstats])
+    chars = np.array([w.chars for _,w in allstats])
+    words = np.array([w.words for _,w in allstats])
+    lines = np.array([w.lines for _,w in allstats])
+    order = times.argsort()
+    times.sort()
+    lines = lines[order]
+    words = words[order]
+    chars = chars[order]
+    datetimes = np.array(map(datetime.fromtimestamp, times))
+    GitStats = namedtuple('GitStats', 'times chars words lines datetimes')
+    return GitStats(times=times, chars=chars, words=words, lines=lines, datetimes=datetimes)
+
 if __name__ == '__main__':
     from matplotlib import pyplot as plt
     import sys
@@ -56,12 +76,8 @@ if __name__ == '__main__':
         pattern = sys.argv[1]
     else:
         pattern = '*'
-    repo = git.Repo('.')
-    allstats = recursive_stats(repo.head.commit, pattern)
-    times = [t for t,_ in allstats]
-    chars = [w.chars for _,w in allstats]
-    words = [w.words for _,w in allstats]
-    plt.plot(map(datetime.fromtimestamp, times), words)
+    stats = extract_stats(stats_for_repo('.'))
+    plt.plot(stats.datetimes, stats.words)
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
     plt.ylabel(r'Nr. words')
