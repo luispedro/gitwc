@@ -27,6 +27,8 @@ class Wc(object):
     def __repr__(self):
         return 'Wc(chars={}, words={}, lines={})'.format(self.chars, self.words, self.lines)
     __str__ = __repr__
+from collections import namedtuple
+GitStats = namedtuple('GitStats', 'times chars words lines datetimes')
 
 def stats(commit, pattern='*', w=None):
     tree = commit.tree
@@ -55,7 +57,6 @@ def stats_for_repo(repo, pattern='*'):
 
 def extract_stats(allstats):
     import numpy as np
-    from collections import namedtuple
     times = np.array([t for t,_ in allstats])
     chars = np.array([w.chars for _,w in allstats])
     words = np.array([w.words for _,w in allstats])
@@ -66,7 +67,6 @@ def extract_stats(allstats):
     words = words[order]
     chars = chars[order]
     datetimes = np.array(map(datetime.fromtimestamp, times))
-    GitStats = namedtuple('GitStats', 'times chars words lines datetimes')
     return GitStats(times=times, chars=chars, words=words, lines=lines, datetimes=datetimes)
 
 if __name__ == '__main__':
