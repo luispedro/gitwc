@@ -31,11 +31,13 @@ from collections import namedtuple
 GitStats = namedtuple('GitStats', 'times chars words lines datetimes')
 
 def stats(commit, pattern='*', w=None):
+    if type(pattern) == str:
+        pattern = [pattern]
     tree = commit.tree
     if w is None:
         w = Wc()
     for elem in tree.traverse():
-        if isinstance(elem, git.Blob) and fnmatch(elem.abspath, pattern):
+        if isinstance(elem, git.Blob) and any(fnmatch(elem.abspath, p) for p in pattern):
             elem.stream_data(w)
     return (commit.committed_date, w)
 
