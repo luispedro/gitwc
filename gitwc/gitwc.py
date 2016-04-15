@@ -30,7 +30,7 @@ class Wc(object):
 from collections import namedtuple
 GitStats = namedtuple('GitStats', 'times chars words lines datetimes')
 
-def stats(commit, pattern='*', w=None):
+def collect_stats(commit, pattern=('*',), w=None):
     if type(pattern) == str:
         pattern = [pattern]
     tree = commit.tree
@@ -49,7 +49,7 @@ def recursive_stats(commit, pattern, gatherer=Wc):
         next = queue.pop()
         if next not in seen:
             seen.add(next)
-            allstats.append(stats(next, pattern, gatherer()))
+            allstats.append(collect_stats(next, pattern, gatherer()))
             queue.extend(next.parents)
     return allstats
 
